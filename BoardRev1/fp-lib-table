@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "EESDLib")(type "KiCad")(uri "/Users/ethanlau/Desktop/School Stuffs/Senior Design I/KiCad Libraries/EESDLib/EESDLib.pretty")(options "")(descr ""))
+)
