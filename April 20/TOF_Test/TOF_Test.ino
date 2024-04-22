@@ -36,10 +36,10 @@ void setup() {
     // Configure all mux pins to outputs
   int mux_num;
   int gpio;
+  Wire.begin(14,13);
 
   leds.init();
   leds.setLedOutputMode(TLC59108::LED_MODE::PWM_IND);
-  Wire.begin(14,13);
   
   for(mux_num=0; mux_num < num_mux; mux_num++){
     while(tof_Mux[mux_num].begin(Wire, 0x20) == false){
@@ -48,38 +48,52 @@ void setup() {
       };
     for(gpio = 0; gpio < mux_pins; gpio++){
       tof_Mux[mux_num].pinMode(gpio, GPIO_OUT); //Configure all pins to output
-      tof_Mux[mux_num].digitalWrite(gpio, LOW); // Toggle Enable High to talk to the right sensor
+      tof_Mux[mux_num].digitalWrite(gpio, LOW); 
     }
   }
 
 
   Serial.println("Start of ToF Config loop");
 
-  while(1){
     for(mux_num = 0; mux_num < num_mux; mux_num++){ // Do for both muxes
-      for (gpio = 0; gpio < mux_pins; gpio++){
+      for (gpio = mux_pins-1; gpio > -1; gpio--){
         Serial.print("GPIO: ");
         Serial.println(gpio);
         mux_GPIO_HIGH(mux_num, gpio);
-        delay(25);
         sensors_vl6180.init();
-        delay(25);
-        sensors_vl6180.configureDefault();
-        delay(25);
+//        sensors_vl6180.configureDefault();
         sensors_vl6180.setAddress(0x29);
-        delay(25);
         sensors_vl6180.setTimeout(500);  // Set timeout to 500ms
-        delay(25);
+        mux_GPIO_LOW(mux_num, gpio);
+      }
+    }
+
+    while(1){
+    for(mux_num = 0; mux_num < num_mux; mux_num++){ // Do for both muxes
+      for (gpio = mux_pins-1; gpio > -1; gpio--){
+        Serial.print("GPIO: ");
+        Serial.println(gpio);
+        mux_GPIO_HIGH(mux_num, gpio);
         Serial.println(sensors_vl6180.readReg(0x000),HEX);
         if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
         sensors_vl6180.writeReg(0x018,0x01);
+        sensors_vl6180.writeReg(0x02d,0x00);
         if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
-        int distance = sensors_vl6180.readReg(0x064);
+        delay(100);
+        Serial.println(sensors_vl6180.readReg(0x04F),BIN);
+        if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+        int distance = sensors_vl6180.readReg(0x062);
+        if(distance < 100){
+          Serial.print("Blink");
+          leds.setBrightness(gpio,100);
+        }
+        else
+          leds.setBrightness(gpio,0);
         if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
         Serial.print(" Distance: ");
         Serial.println(distance);
         if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
-        delay(2000);
+//        delay(200);
         mux_GPIO_LOW(mux_num, gpio);
       }
     }
