@@ -10,7 +10,7 @@
 
 #define SDA 14
 #define SCL 13
-#define ADDR 0x40
+#define ADDR 0x41
 
 
 TLC59108 leds(ADDR); // Define TLC59108 object using I2C pointer and slave address
@@ -42,7 +42,7 @@ void setup() {
   leds.setLedOutputMode(TLC59108::LED_MODE::PWM_IND);
   
   for(mux_num=0; mux_num < num_mux; mux_num++){
-    while(tof_Mux[mux_num].begin(Wire, 0x20) == false){
+    while(tof_Mux[mux_num].begin(Wire, 0x21) == false){
       Serial.println("Mux not connected");
       delay(500);
       };
@@ -80,7 +80,7 @@ void setup() {
         sensors_vl6180.writeReg(0x02d,0x00);
         if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
         delay(100);
-        Serial.println(sensors_vl6180.readReg(0x04F),BIN);
+        Serial.println(sensors_vl6180.readReg(0x04D),BIN);
         if (sensors_vl6180.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
         int distance = sensors_vl6180.readReg(0x062);
         if(distance < 100){
